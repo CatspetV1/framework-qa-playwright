@@ -1,18 +1,27 @@
-
 from playwright.sync_api import Page, expect
 
-def test_login_exitoso(page: Page):
-    # 1. Navegamos a la página de pruebas
-    page.goto("https://www.saucedemo.com/")
+def test_crear_nuevo_registro_api(page: Page):
+    # 1. Preparamos nuestro paquete de datos (El Body)
+    nuevos_datos = {
+        "title": "Ingeniero QA Automation",
+        "body": "Aprendiendo Playwright en AlmaLinux",
+        "userId": 1
+    }
     
-    # 2. Llenamos el formulario (Buscamos por el 'id' del elemento)
-    page.fill("#user-name", "standard_user")
-    page.fill("#password", "secret_sauce")
+    # 2. Hacemos la petición POST. 
+    # Fíjate cómo ahora usamos page.request.post() y le pasamos el parámetro 'data'
+    respuesta = page.request.post(
+        "https://jsonplaceholder.typicode.com/posts",
+        data=nuevos_datos
+    )
     
-    # 3. Hacemos clic en el botón de login
-    page.click("#login-button")
+    # 3. Validamos que el servidor haya creado el registro con éxito.
+    # El código HTTP para "Creado exitosamente" es el 201
+    expect(respuesta).to_be_ok()
+    assert respuesta.status == 201
     
-    # 4. ASERCIÓN: Validamos que pasamos al dashboard buscando el título "Products"
-    expect(page.locator(".title")).to_have_text("Products")
+    # 4. Extraemos la respuesta del servidor
+    datos_creados = respuesta.json()
     
-    print("\n¡Login automatizado exitosamente! El robot controló el navegador.")
+    # Imprimimos lo que nos respondió el servidor
+    print(f"\n¡Registro creado en el servidor!: {datos_creados}")
