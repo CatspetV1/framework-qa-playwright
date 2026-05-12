@@ -1,0 +1,36 @@
+name: Ejecucion Automatica de Pruebas
+
+# 1. ¿Cuándo se activa el robot? Cada vez que alguien suba código a "main"
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  pruebas-ui:
+    # 2. ¿Dónde va a vivir el robot? En un servidor prestado por GitHub con Ubuntu Linux
+    runs-on: ubuntu-latest
+    
+    steps:
+    # 3. Clona (descarga) tu código de GitHub a ese servidor virtual
+    - name: Descargar el codigo
+      uses: actions/checkout@v4
+      
+    # 4. Instala Python en el servidor virtual
+    - name: Instalar Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+        
+    # 5. Instala las herramientas que usamos (Playwright y Pytest)
+    - name: Instalar dependencias
+      run: |
+        python -m pip install --upgrade pip
+        pip install pytest-playwright
+        
+    # 6. Descarga los navegadores "fantasma" de Playwright (Chromium, Firefox)
+    - name: Instalar navegadores Playwright
+      run: playwright install --with-deps
+      
+    # 7. ¡EL PASO FINAL! Ejecutar la prueba inteligente que lee tu JSON
+    - name: Correr pruebas de compra
+      run: pytest test_compras_json.py -v
